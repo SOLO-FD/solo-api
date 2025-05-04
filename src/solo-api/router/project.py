@@ -1,8 +1,9 @@
-from fastapi import APIRouter
-from sqlmodel import Session, select
+from fastapi import APIRouter, Query
+from sqlalchemy import select
+from typing import Annotated
 
-from ..model.project import project
-from ..database import engine
+from ..models.project import Project
+from ..dependencies.session import SessionDep
 
 router = APIRouter(
     prefix="/projects",
@@ -11,16 +12,18 @@ router = APIRouter(
 
 
 @router.post("/projects/")
-def create_project(project: project):
-    with Session(engine) as session:
-        session.add(project)
-        session.commit()
-        session.refresh(project)
-        return project
+def create_project(project: Project, session: SessionDep) -> Project:
+    session.add(project)
+    session.commit()
+    session.refresh(project)
+    return project
 
 
 @router.get("/projects/")
-def read_projects():
-    with Session(engine) as session:
-        projects = session.exec(select(project)).all()
-        return projects
+def read_projects(
+    session: SessionDep,
+    offset: int = 0,
+    limit: Annotated[int, Query(le=100)] = 100,
+) -> list[Project]:
+    projects = session.execute(select(Project).offset(offset).limit(limit)).all()
+    return projects
