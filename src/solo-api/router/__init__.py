@@ -1,5 +1,5 @@
-from .hero import router as hero_router
+from .project import router as project_router
 
 routers = [
-    hero_router,
+    project_router,
 ]
