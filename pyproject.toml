@@ -1,0 +1,33 @@
+[project]
+name = "solo-api"
+version = "0.1.0"
+description = "API for solo project, which helping people storing their projects info in one place."
+authors = [
+    {name = "Huang Chuan",email = "river1440@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+package-mode = false
+
+[tool.poetry.group.test]
+optional = true
+
+[tool.poetry.group.test.dependencies]
+pytest = "^8.3.5"
+
+[tool.poetry.group.dev]
+optional = true
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.11.8"
+pre-commit = "^4.2.0"
+
