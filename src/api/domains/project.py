@@ -1,0 +1,55 @@
+from dataclasses import dataclass, field
+from datetime import date
+from typing import Optional
+from .base import EntityDomain
+from .attachment import AttachmentDomain
+
+
+@dataclass(kw_only=True)
+class ProjectDomain(EntityDomain):
+    start_date: date
+    end_date: Optional[date] = None
+    header_url: Optional[str] = None
+    cover_url: Optional[str] = None
+    _attachments: list[AttachmentDomain] = field(default_factory=list)
+
+    @property
+    def attachments(self) -> list[AttachmentDomain]:
+        return self._attachments
+
+    def add_attachment(self, **kwargs) -> AttachmentDomain:
+        # Only allow valid fields from AttachmentDomain
+        allowed_keys = set(AttachmentDomain.__annotations__.keys())
+        filtered_kwargs = {k: v for k, v in kwargs.items() if k in allowed_keys}
+
+        # Instanced attachment
+        attachment = AttachmentDomain(**filtered_kwargs)
+
+        self._attachments.append(attachment)
+
+        return attachment
+
+    def add_attachments(self, items: list[dict]) -> list[AttachmentDomain]:
+        attachment_list = []
+        for item in items:
+            attachment_list.append(self.add_attachment(**item))
+
+        return attachment_list
+
+    def get_attachment_by_id(self, attachment_id: str) -> Optional[AttachmentDomain]:
+        matches = [a for a in self._attachments if a.id == attachment_id]
+        if len(matches) > 1:
+            raise ValueError(
+                f"Attachment with id={attachment_id} should be unique, found {len(matches)}."
+            )
+
+        if matches:
+            return matches[0]
+        else:
+            raise ValueError(f"Attachment with ID {attachment_id} not existed")
+
+    def remove_attachment_by_id(self, attachment_id):
+        # Check if provided attachmend_id existed
+        self.get_attachment_by_id(attachment_id)
+
+        self._attachments = [a for a in self._attachments if a.id != attachment_id]

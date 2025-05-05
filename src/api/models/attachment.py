@@ -1,20 +1,8 @@
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import String, BigInteger, ForeignKey
-from enum import Enum
+from ..enums import FileType
 
 from .base import BaseModel
-
-
-class FileType(str, Enum):
-    PDF = "PDF"
-    DOCX = "DOCX"
-    TXT = "TXT"
-    CSV = "CSV"
-    JSON = "JSON"
-    PNG = "PNG"
-    JPG = "JPG"
-    MD = "MD"
-    HTML = "HTML"
 
 
 class Attachment(BaseModel):
