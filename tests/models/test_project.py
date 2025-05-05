@@ -1,4 +1,4 @@
-from src.api.models import Project, Attachment
+from src.api.models import Project, Attachment, ProjectTagAssociation
 from tests.factories.models import ProjectFactory
 
 
@@ -97,3 +97,29 @@ class TestProjectModelCase:
             )
             is not None
         )
+
+    async def test_project_add_tag(self, default_project, default_tag, session):
+        # Arrange: Create association
+        assoc = ProjectTagAssociation(project=default_project, tag=default_tag)
+
+        # Act: Add to database
+        session.add(assoc)
+        await session.commit()
+
+        # Arrange: Get project from database
+        project_from_db = await session.get(
+            Project,
+            default_project.id,
+            populate_existing=True,
+        )
+
+        # Act: Get assoc from database
+        result = await session.scalars(
+            project_from_db.tags.select().where(
+                ProjectTagAssociation.tag_id == default_tag.id
+            )
+        )
+        tag_assoc = result.one_or_none()
+
+        # Assert: Default tag should be included
+        assert tag_assoc is not None
