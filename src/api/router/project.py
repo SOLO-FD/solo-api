@@ -3,7 +3,7 @@ from sqlalchemy import select
 from typing import Annotated
 
 from ..models.project import Project
-from ..dependencies.session import SessionDep
+from ..dependencies import SessionDep
 
 router = APIRouter(
     prefix="/projects",
@@ -12,7 +12,7 @@ router = APIRouter(
 
 
 @router.post("/projects/")
-def create_project(project: Project, session: SessionDep) -> Project:
+async def create_project(project: Project, session: SessionDep) -> Project:
     session.add(project)
     session.commit()
     session.refresh(project)
@@ -20,7 +20,7 @@ def create_project(project: Project, session: SessionDep) -> Project:
 
 
 @router.get("/projects/")
-def read_projects(
+async def read_projects(
     session: SessionDep,
     offset: int = 0,
     limit: Annotated[int, Query(le=100)] = 100,
