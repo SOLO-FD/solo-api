@@ -1,5 +1,6 @@
-from src.api.models import Project, Attachment, ProjectTagAssociation
-from tests.factories.models import ProjectFactory
+from sqlalchemy import select
+from src.api.models import Project, Attachment, ProjectTagAssociation, Tag
+from tests.factories.models import ProjectFactory, TagFactory
 
 
 class TestProjectModelCase:
@@ -123,3 +124,33 @@ class TestProjectModelCase:
 
         # Assert: Default tag should be included
         assert tag_assoc is not None
+
+    async def test_get_tags_from_project(self, default_project, session):
+        # Arrange: Create tags and associations
+        NEW_TAG = 5
+        tag_ids = []
+        for _ in range(NEW_TAG):
+            tag = TagFactory()
+            tag_ids.append(tag.id)
+            assoc = ProjectTagAssociation(project=default_project, tag=tag)
+            session.add_all([tag, assoc])
+
+        # Arrange: Check id includes
+        assert len(tag_ids) == NEW_TAG
+
+        await session.commit()
+
+        # Arrange: Get project from database
+        project_from_db = await session.get(
+            Project,
+            default_project.id,
+            populate_existing=True,
+        )
+
+        # Act: Get tags from database
+        result = await session.scalars(project_from_db.tags.select())
+        tag_ids_from_db = [assoc.tag_id for assoc in result.all()]
+        results = await session.scalars(select(Tag).where(Tag.id.in_(tag_ids_from_db)))
+
+        # Assert: Check if all id included
+        assert all(tag.id in tag_ids for tag in results.all())

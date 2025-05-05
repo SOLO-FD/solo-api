@@ -1,5 +1,7 @@
-from src.api.models import Tag
-from tests.factories.models import TagFactory
+from sqlalchemy import select
+
+from src.api.models import Tag, Project, ProjectTagAssociation
+from tests.factories.models import TagFactory, ProjectFactory
 
 
 class TestTagModelCase:
@@ -53,3 +55,35 @@ class TestTagModelCase:
 
         # Assert: Test if successfully get orm from db
         assert await session.get(Tag, default_tag.id) is None
+
+    async def test_get_projects_from_tag(self, default_tag, session):
+        # Arrange: Create projects and associations
+        NEW_PROJECT = 5
+        project_ids = []
+        for _ in range(NEW_PROJECT):
+            proj = ProjectFactory()
+            project_ids.append(proj.id)
+            assoc = ProjectTagAssociation(project=proj, tag=default_tag)
+            session.add_all([proj, assoc])
+
+        # Arrange: Check id includes
+        assert len(project_ids) == NEW_PROJECT
+
+        await session.commit()
+
+        # Arrange: Get tag from database
+        tag_from_db = await session.get(
+            Tag,
+            default_tag.id,
+            populate_existing=True,
+        )
+
+        # Act: Get projects from database
+        result = await session.scalars(tag_from_db.projects.select())
+        proj_ids_from_db = [assoc.project_id for assoc in result.all()]
+        results = await session.scalars(
+            select(Project).where(Project.id.in_(proj_ids_from_db))
+        )
+
+        # Assert: Check if all id included
+        assert all(proj.id in project_ids for proj in results.all())
