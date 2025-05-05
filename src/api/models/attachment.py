@@ -1,0 +1,42 @@
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import String, BigInteger, ForeignKey
+from enum import Enum
+
+from .base import BaseModel
+
+
+class FileType(str, Enum):
+    PDF = "PDF"
+    DOCX = "DOCX"
+    TXT = "TXT"
+    CSV = "CSV"
+    JSON = "JSON"
+    PNG = "PNG"
+    JPG = "JPG"
+    MD = "MD"
+    HTML = "HTML"
+
+
+class Attachment(BaseModel):
+    __tablename__ = "attachment"
+
+    filename: Mapped[str] = mapped_column(String(128), index=True)
+    file_type: Mapped[FileType] = mapped_column(String(10), index=True)
+    url: Mapped[str] = mapped_column(String, unique=True)
+    size: Mapped[int] = mapped_column(BigInteger)
+
+    # By SHA256
+    checksum: Mapped[str] = mapped_column(String(64), unique=True)
+
+    # Many-to-one with project
+    project_id: Mapped[str] = mapped_column(
+        ForeignKey("project.id", ondelete="CASCADE")
+    )
+    project: Mapped["Project"] = relationship(  # noqa:F821
+        "Project",
+        back_populates="attachments",
+        lazy="raise",
+    )
+
+    def __repr__(self) -> str:
+        return f"<Attachment(id='{self.id}', filename='{self.filename}')>"

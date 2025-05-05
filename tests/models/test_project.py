@@ -1,4 +1,4 @@
-from src.api.models import Project
+from src.api.models import Project, Attachment
 from tests.factories.models import ProjectFactory
 
 
@@ -44,7 +44,10 @@ class TestProjectModelCase:
 
     async def test_project_model_get(self, default_project, session):
         # Act: Get project by session
-        project_from_db = await session.get(Project, default_project.id)
+        project_from_db = await session.get(
+            Project,
+            default_project.id,
+        )
 
         # Assert: Test if successfully get orm from db
         assert project_from_db == default_project
@@ -55,4 +58,42 @@ class TestProjectModelCase:
         await session.commit()
 
         # Assert: Test if successfully get orm from db
-        assert await session.get(Project, default_project.id) is None
+        assert (
+            await session.get(
+                Project,
+                default_project.id,
+            )
+            is None
+        )
+
+    async def test_project_still_there_when_attachment_deleted(
+        self, default_project, default_attachment, session
+    ):
+        # Arrange: Add default attachment to default project
+        default_project.attachments.add(default_attachment)
+        await session.commit()
+        await session.refresh(default_project)
+
+        # Arrange: Ensure the attachment is added to project
+
+        result = await session.scalars(
+            default_project.attachments.select().where(
+                Attachment.id == default_attachment.id
+            )
+        )
+
+        assert result.one() is not None
+
+        # Act: Delete Attachment
+        await session.delete(default_attachment)
+        await session.commit()
+
+        # Assert: Attachment should be disappeared as well
+        assert (
+            await session.get(
+                Project,
+                default_project.id,
+                populate_existing=True,
+            )
+            is not None
+        )

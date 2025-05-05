@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, WriteOnlyMapped, mapped_column, relationship
 from sqlalchemy import String, Date
 from typing import Optional
 
@@ -21,6 +21,23 @@ class Project(EntityModel):
     )
     header_url: Mapped[Optional[str]] = mapped_column(String, default=None)
     cover_url: Mapped[Optional[str]] = mapped_column(String, default=None)
+
+    # One-to-many with attachment
+    attachments: WriteOnlyMapped["Attachment"] = relationship(  # noqa:F821
+        "Attachment",
+        back_populates="project",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        order_by="Attachment.created_at.desc()",
+    )
+
+    # Many-to-many with tag
+    tags: WriteOnlyMapped["ProjectTagAssociation"] = relationship(  # noqa:F821
+        back_populates="project",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        order_by="ProjectTagAssociation.created_at.desc()",
+    )
 
     def __repr__(self) -> str:
         return f"<Project(id='{self.id}', name='{self.name}')>"

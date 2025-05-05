@@ -39,3 +39,23 @@ class ProjectFactory(EntityFactory):
 
     header_url = factory.Faker("image_url")
     cover_url = factory.Faker("image_url")
+
+
+class AttachmentFactory(BaseFactory):
+    class Meta:
+        model = models.Attachment
+
+    filename = factory.LazyFunction(lambda: fake.sentence(nb_words=5).replace(".", ""))
+    file_type = factory.Faker("enum", enum_cls=models.FileType)
+    url = factory.Faker("url")
+    size = factory.Faker("random_int", min=0, max=5000000000)  # ~5GB
+    checksum = factory.Faker("sha256")
+    project = factory.SubFactory(ProjectFactory)
+    project_id = factory.SelfAttribute("project.id")
+
+
+class TagFactory(EntityFactory):
+    class Meta:
+        model = models.Tag
+
+    color = factory.Faker("color")

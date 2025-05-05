@@ -1,30 +1,46 @@
 import pytest
+import os
 from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
-from src.api.database import Base
+from sqlalchemy import event
 import tempfile
 
+from src.api.database import Base
 from src.api.main import app
 from src.api.dependencies import get_async_session
 
 
 @pytest.fixture(name="session", scope="function")
 async def session_fixture():
-    # Create a temporary file-based SQLite database
-    with tempfile.NamedTemporaryFile(suffix=".db") as tmp:
-        db_url = f"sqlite+aiosqlite:///{tmp.name}"
-        engine = create_async_engine(db_url, connect_args={"check_same_thread": False})
-        async_session_maker = async_sessionmaker(engine, expire_on_commit=False)
+    # Create a truly persistent temp file path
+    fd, path = tempfile.mkstemp(suffix=".db")
+    os.close(fd)
 
-        # Create tables
-        async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
+    db_url = f"sqlite+aiosqlite:///{path}"
+    engine = create_async_engine(
+        db_url,
+        # echo=True,
+        connect_args={"check_same_thread": False},
+    )
+    async_session_maker = async_sessionmaker(engine, expire_on_commit=False)
 
-        # Provide a clean session for the test
-        async with async_session_maker() as session:
-            yield session
+    # Enable PRAGMA foreign_keys for SQLite
+    @event.listens_for(engine.sync_engine, "connect")
+    def _set_sqlite_pragma(dbapi_connection, connection_record):
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA foreign_keys=ON")
+        cursor.close()
 
-        # Tables will be dropped automatically when temp file is deleted
+    # Create tables
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
+    # Provide a clean session for the test
+    async with async_session_maker() as session:
+        yield session
+
+    # Clean up temp file manually
+    os.remove(path)
 
 
 @pytest.fixture(name="client", scope="function")
