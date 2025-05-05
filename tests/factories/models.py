@@ -10,6 +10,7 @@ fake = Faker()
 class BaseFactory(factory.Factory):
     class Meta:
         abstract = True
+        model = models.BaseModel
 
     id = factory.LazyFunction(lambda: generate(size=13))
     created_at = factory.LazyFunction(lambda: datetime.now(timezone.utc))
@@ -18,8 +19,10 @@ class BaseFactory(factory.Factory):
 class EntityFactory(BaseFactory):
     class Meta:
         abstract = True
+        model = models.EntityModel
 
-    name = factory.LazyFunction(lambda: fake.text(max_nb_chars=3).replace(".", ""))
+    name = factory.LazyFunction(lambda: fake.sentence(nb_words=5).replace(".", ""))
+    owner_id = factory.LazyFunction(lambda: generate(size=13))
     updated_at = factory.LazyFunction(lambda: datetime.now(timezone.utc))
     description = factory.Faker("paragraph", nb_sentences=5)
 
