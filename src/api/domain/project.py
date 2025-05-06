@@ -17,6 +17,13 @@ class ProjectDomain(EntityDomain):
     def attachments(self) -> list[AttachmentDomain]:
         return self._attachments
 
+    def __repr__(self) -> str:
+        if len(self._attachments) > 1:
+            unit = "attachments"
+        else:
+            unit = "attachment"
+        return f"<ProjectDomain(id='{self.id}', name='{self.name}, {len(self._attachments)} {unit}')>"
+
     def add_attachment(self, **kwargs) -> AttachmentDomain:
         # Only allow valid fields from AttachmentDomain
 
