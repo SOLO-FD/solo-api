@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from datetime import date
-from typing import Optional
+from typing import Optional, get_type_hints
 from .base import EntityDomain
 from .attachment import AttachmentDomain
 
@@ -19,14 +19,14 @@ class ProjectDomain(EntityDomain):
 
     def add_attachment(self, **kwargs) -> AttachmentDomain:
         # Only allow valid fields from AttachmentDomain
-        allowed_keys = set(AttachmentDomain.__annotations__.keys())
+
+        allowed_keys = set(get_type_hints(AttachmentDomain).keys())
         filtered_kwargs = {k: v for k, v in kwargs.items() if k in allowed_keys}
 
         # Instanced attachment
         attachment = AttachmentDomain(**filtered_kwargs)
 
         self._attachments.append(attachment)
-
         return attachment
 
     def add_attachments(self, items: list[dict]) -> list[AttachmentDomain]:

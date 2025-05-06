@@ -1,5 +1,5 @@
 import pytest
-from tests.factories.domains import ProjectDomainFactory
+from tests.factory.domains import ProjectDomainFactory
 
 
 @pytest.fixture(scope="function")

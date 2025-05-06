@@ -1,5 +1,5 @@
 import pytest
-from tests.factories.models import (
+from tests.factory.models import (
     ProjectFactory,
     AttachmentFactory,
     TagFactory,

@@ -1,6 +1,6 @@
 from sqlalchemy import select
-from src.api.models import Project, Attachment, ProjectTagAssociation, Tag
-from tests.factories.models import ProjectFactory, TagFactory
+from src.api.model import Project, Attachment, ProjectTagAssociation, Tag
+from tests.factory.models import ProjectFactory, TagFactory, AttachmentFactory
 
 
 class TestProjectModelCase:
@@ -67,38 +67,6 @@ class TestProjectModelCase:
             is None
         )
 
-    async def test_project_still_there_when_attachment_deleted(
-        self, default_project, default_attachment, session
-    ):
-        # Arrange: Add default attachment to default project
-        default_project.attachments.add(default_attachment)
-        await session.commit()
-        await session.refresh(default_project)
-
-        # Arrange: Ensure the attachment is added to project
-
-        result = await session.scalars(
-            default_project.attachments.select().where(
-                Attachment.id == default_attachment.id
-            )
-        )
-
-        assert result.one() is not None
-
-        # Act: Delete Attachment
-        await session.delete(default_attachment)
-        await session.commit()
-
-        # Assert: Attachment should be disappeared as well
-        assert (
-            await session.get(
-                Project,
-                default_project.id,
-                populate_existing=True,
-            )
-            is not None
-        )
-
     async def test_project_add_tag(self, default_project, default_tag, session):
         # Arrange: Create association
         assoc = ProjectTagAssociation(project=default_project, tag=default_tag)
@@ -154,3 +122,60 @@ class TestProjectModelCase:
 
         # Assert: Check if all id included
         assert all(tag.id in tag_ids for tag in results.all())
+
+    async def test_project_still_there_when_attachment_deleted(
+        self, default_project, default_attachment, session
+    ):
+        # Arrange: Add default attachment to default project
+        default_project.attachments.add(default_attachment)
+        await session.commit()
+        await session.refresh(default_project)
+
+        # Arrange: Ensure the attachment is added to project
+
+        result = await session.scalars(
+            default_project.attachments.select().where(
+                Attachment.id == default_attachment.id
+            )
+        )
+
+        assert result.one() is not None
+
+        # Act: Delete Attachment
+        await session.delete(default_attachment)
+        await session.commit()
+
+        # Assert: Attachment should be disappeared as well
+        assert (
+            await session.get(
+                Project,
+                default_project.id,
+                populate_existing=True,
+            )
+            is not None
+        )
+
+    async def test_project_add_attachment(self, default_project, session):
+        # Act: Add new attachment to default project
+        attachment = AttachmentFactory()
+        params = {
+            "id": attachment.id,
+            "filename": attachment.filename,
+            "file_type": attachment.file_type,
+            "url": attachment.url,
+            "size": attachment.size,
+            "checksum": attachment.checksum,
+        }
+
+        default_project.attachments.add(Attachment(**params))
+
+        await session.commit()
+        await session.refresh(default_project)
+
+        # Assert: Check if attachment inside the collections
+        results = await session.scalars(
+            default_project.attachments.select().where(Attachment.id == attachment.id)
+        )
+        attachment = results.one()
+
+        assert attachment is not None

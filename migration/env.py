@@ -24,7 +24,7 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # Import all models for migration
-from src.api import models  # noqa: E402, F401
+from src.api import model  # noqa: E402, F401
 
 # target_metadata = mymodel.Base.metadata
 # Import Base for metadata

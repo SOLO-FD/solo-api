@@ -1,7 +1,7 @@
 import pytest
 from sqlalchemy.exc import IntegrityError
-from src.api.models import Attachment, Project
-from tests.factories.models import AttachmentFactory
+from src.api.model import Attachment, Project
+from tests.factory.models import AttachmentFactory
 
 
 class TestAttachmentModelCase:
@@ -84,6 +84,52 @@ class TestAttachmentModelCase:
         session.add(attachment)
 
         # Assert: Attachment without project will raise IntegrityError
+        with pytest.raises(IntegrityError):
+            await session.commit()
+
+    async def test_attachemnt_by_passing_project(self, session, default_project):
+        # Arrange: Define param
+        attachment_param = {
+            "filename": "Good Attachment",
+            "url": "https://example.com/awesome-pic",
+            "project": None,
+            "project_id": "",
+        }
+
+        attachment = AttachmentFactory(**attachment_param)
+
+        # Act: Passing project
+        attachment.project = default_project
+
+        # Act: Add attachment
+        session.add(attachment)
+        await session.commit()
+
+        # Assert: Attachment should be in project's collection
+        results = await session.scalars(
+            default_project.attachments.select().where(Attachment.id == attachment.id)
+        )
+        attachment = results.one()
+        assert attachment is not None
+
+    async def test_attachemnt_by_passing_project_id(self, session, default_project):
+        # Arrange: Define param
+        attachment_param = {
+            "filename": "Good Attachment",
+            "url": "https://example.com/awesome-pic",
+            "project": None,
+            "project_id": "",
+        }
+
+        attachment = AttachmentFactory(**attachment_param)
+
+        # Act: Passing project
+        attachment.project_id = default_project.id
+
+        # Act: Add attachment
+        session.add(attachment)
+
+        # Assert: Attachment passed project_id will raise IntegrityError
         with pytest.raises(IntegrityError):
             await session.commit()
 

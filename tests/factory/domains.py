@@ -1,37 +1,37 @@
 import factory
 from faker import Faker
 from nanoid import generate
-from datetime import datetime, timezone, timedelta
+from datetime import timedelta  # ,datetime, timezone,
 
-from src.api import models
+from src.api import domain
 from src.api.enums import FileType
 
 fake = Faker()
 
 
-class BaseFactory(factory.Factory):
+class BaseDomainFactory(factory.Factory):
     class Meta:
         abstract = True
-        model = models.BaseModel
+        model = domain.BaseDomain
 
     id = factory.LazyFunction(lambda: generate(size=13))
-    created_at = factory.LazyFunction(lambda: datetime.now(timezone.utc))
+    # created_at = factory.LazyFunction(lambda: datetime.now(timezone.utc))
 
 
-class EntityFactory(BaseFactory):
+class EntityDomainFactory(BaseDomainFactory):
     class Meta:
         abstract = True
-        model = models.EntityModel
+        model = domain.EntityDomain
 
     name = factory.LazyFunction(lambda: fake.sentence(nb_words=5).replace(".", ""))
     owner_id = factory.LazyFunction(lambda: generate(size=13))
-    updated_at = factory.LazyFunction(lambda: datetime.now(timezone.utc))
+    # updated_at = factory.LazyFunction(lambda: datetime.now(timezone.utc))
     description = factory.Faker("paragraph", nb_sentences=5)
 
 
-class ProjectFactory(EntityFactory):
+class ProjectDomainFactory(EntityDomainFactory):
     class Meta:
-        model = models.Project
+        model = domain.ProjectDomain
 
     start_date = factory.Faker("date_object")
 
@@ -43,21 +43,19 @@ class ProjectFactory(EntityFactory):
     cover_url = factory.Faker("image_url")
 
 
-class AttachmentFactory(BaseFactory):
+class AttachmentDomainFactory(BaseDomainFactory):
     class Meta:
-        model = models.Attachment
+        model = domain.AttachmentDomain
 
     filename = factory.LazyFunction(lambda: fake.sentence(nb_words=5).replace(".", ""))
     file_type = factory.Faker("enum", enum_cls=FileType)
     url = factory.Faker("url")
     size = factory.Faker("random_int", min=0, max=5000000000)  # ~5GB
     checksum = factory.Faker("sha256")
-    project = factory.SubFactory(ProjectFactory)
-    project_id = factory.SelfAttribute("project.id")
 
 
-class TagFactory(EntityFactory):
+class TagDomainFactory(EntityDomainFactory):
     class Meta:
-        model = models.Tag
+        model = domain.TagDomain
 
     color = factory.Faker("color")

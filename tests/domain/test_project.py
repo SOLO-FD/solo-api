@@ -1,5 +1,6 @@
 import pytest
-from tests.factories.domains import AttachmentDomainFactory
+from dataclasses import asdict
+from tests.factory.domains import AttachmentDomainFactory
 from src.api.utils import generate_id
 
 
@@ -32,6 +33,16 @@ class TestProjectDomainCase:
 
         # Assert: Attachment is in default_project
         assert a_return.id in [a.id for a in default_project.attachments]
+
+    def test_project_domain_add_attachment_from_factory(self, default_project):
+        # Arrange: Create attachment param
+        attachment = AttachmentDomainFactory()
+
+        # Act: Add attachment
+        attachment_return = default_project.add_attachment(**asdict(attachment))
+
+        # Assert: Attachment is in default_project
+        assert attachment_return.id in [a.id for a in default_project.attachments]
 
     def test_project_domain_get_attachments(self, default_project):
         # Arrange: Add attachments

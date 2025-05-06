@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class FileType(str, Enum):
+class FileType(StrEnum):
     PDF = "PDF"
     DOCX = "DOCX"
     TXT = "TXT"
