@@ -25,7 +25,7 @@ class BaseSQLALchemyRepo(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def list_owned(self, *args, **kwargs):
+    async def list_by_owner_id(self, *args, **kwargs):
         raise NotImplementedError
 
     @abstractmethod

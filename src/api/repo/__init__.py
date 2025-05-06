@@ -1,12 +1,7 @@
 from .project import ProjectRepo
-# from .attachment import Attachment
-# from .tag import Tag
-# from .project_tag import ProjectTagAssociation
+from .tag import TagRepo
 
 __all__ = [
     "ProjectRepo",
-    # "Attachment",
-    # "FileType",
-    # "Tag",
-    # "ProjectTagAssociation",
+    "TagRepo",
 ]
