@@ -43,25 +43,6 @@ class ProjectRepo(BaseSQLALchemyRepo):
 
         return [await self._orm_to_domain(proj_orm) for proj_orm in orms]
 
-    async def list_by_tag_id(self, tag_id: str) -> list[ProjectDomain]:
-        # Get assoc based on tag_id
-        results = await self._session.scalars(
-            select(ProjectTagAssociation).filter_by(tag_id=tag_id)
-        )
-
-        assocs = results.all()
-
-        # Get project IDs
-        selected_proj_ids = [assoc.project_id for assoc in assocs]
-
-        # Get projects
-        proj_results = await self._session.scalars(
-            select(Project).where(Project.id.in_(selected_proj_ids))
-        )
-        orms = proj_results.all()
-
-        return [await self._orm_to_domain(proj_orm) for proj_orm in orms]
-
     async def update(self, project: ProjectDomain) -> ProjectDomain:
         # Define allow fields
         drop_keys = {"id", "created_at", "updated_at", "owner_id", "_attachments"}
@@ -82,12 +63,33 @@ class ProjectRepo(BaseSQLALchemyRepo):
 
         return await self._orm_to_domain(commited_orm)
 
-    async def delete_by_id(self, project_id: str):
+    async def delete_by_id(self, project_id: str) -> None:
         # Get obj from db first
         proj_orm = await self._get_proj_from_db(project_id)
         await self._session.delete(proj_orm)
 
-    async def add_tag_by_id(self, project_id: str, tag_id: str):
+    #  === Tag-related ===
+
+    async def list_by_tag_id(self, tag_id: str) -> list[ProjectDomain]:
+        # Get assoc based on tag_id
+        results = await self._session.scalars(
+            select(ProjectTagAssociation).filter_by(tag_id=tag_id)
+        )
+
+        assocs = results.all()
+
+        # Get project IDs
+        selected_proj_ids = [assoc.project_id for assoc in assocs]
+
+        # Get projects
+        proj_results = await self._session.scalars(
+            select(Project).where(Project.id.in_(selected_proj_ids))
+        )
+        orms = proj_results.all()
+
+        return [await self._orm_to_domain(proj_orm) for proj_orm in orms]
+
+    async def add_tag_by_id(self, project_id: str, tag_id: str) -> None:
         # Check if tag existed
         if await self._session.get(Tag, tag_id, populate_existing=True) is None:
             raise ValueError(f"Tag with ID {tag_id} not existed.")
@@ -97,7 +99,7 @@ class ProjectRepo(BaseSQLALchemyRepo):
         self._session.add(assoc)
         await self._session.commit()
 
-    async def remove_tag_by_id(self, project_id: str, tag_id: str):
+    async def remove_tag_by_id(self, project_id: str, tag_id: str) -> None:
         # Get assoc
         assoc = await self._session.get(
             ProjectTagAssociation,
@@ -125,10 +127,12 @@ class ProjectRepo(BaseSQLALchemyRepo):
     async def _update_attachments(
         self, prev_proj_orm: Project, update_proj_domain: ProjectDomain
     ):
-        # Clear existing attachments
-        await self._session.execute(
-            delete(Attachment).where(Attachment.project_id == prev_proj_orm.id)
-        )
+        # Since run query before commit changed, use no_autoflush ensure commit together later
+        with self._session.no_autoflush:
+            # Clear existing attachments
+            await self._session.execute(
+                delete(Attachment).where(Attachment.project_id == prev_proj_orm.id)
+            )
 
         # Create all attachments from update_proj_domain
         prev_proj_orm.attachments.add_all(
