@@ -1,3 +1,4 @@
+import pytest
 from dataclasses import asdict
 
 from src.api.service import ProjectService
@@ -7,30 +8,13 @@ from src.api.dto import (
     AttachmentCreateDTO,
 )
 from src.api.domain import ProjectDomain
-
+from src.api.utils import generate_id
 from tests.factory.domains import ProjectDomainFactory, AttachmentDomainFactory
 from tests.factory.dto import new_dto_from_domain_factory
+from tests.factory.service import create_project_by_service
 
 
 class TestProjectServiceCase:
-    async def _create_project_by_service(
-        self, session, attachment_num=3
-    ) -> ProjectDomain:
-        project_dto = new_dto_from_domain_factory(
-            ProjectDomainFactory,
-            ProjectCreateDTO,
-        )
-
-        for _ in range(attachment_num):
-            attachment_dto = new_dto_from_domain_factory(
-                AttachmentDomainFactory,
-                AttachmentCreateDTO,
-            )
-            project_dto.attachments.append(attachment_dto)
-
-        service = ProjectService(session)
-        return await service.create(project_dto)
-
     # === HAPPY tests following ===
     async def test_create_project_by_service(self, session):
         # Arrange: Create project create DTO
@@ -49,7 +33,9 @@ class TestProjectServiceCase:
 
         # Act: Create project by service
         service = ProjectService(session)
-        project_return = await service.create(project_dto)
+        fake_id = generate_id()
+
+        project_return = await service.create(fake_id, project_dto)
 
         # Assert: Assert Correct type
         assert isinstance(project_return, ProjectDomain)
@@ -80,26 +66,22 @@ class TestProjectServiceCase:
                     f"Mismatch on attachment '{checksum}' key '{k}'"
                 )
 
-    async def test_update_project_by_service(self, session):
-        # Arrange: Create a project
-        new_project = await self._create_project_by_service(session)
-
+    async def test_update_project_by_service(self, session, new_project):
         # Arrange: Create a project update dto
         update_param = {"name": "This is update name!"}
         updated_dto = ProjectUpdateDTO(**update_param)
 
         # Act: Update project by service
         service = ProjectService(session)
-        project_return = await service.update(new_project.id, updated_dto)
+        project_return = await service.update(
+            new_project.owner_id, new_project.id, updated_dto
+        )
 
         # Assert: Check if the updated success
         return_dict = asdict(project_return)
         assert all(return_dict[k] == v for k, v in update_param.items())
 
-    async def test_add_attachment_by_service(self, session):
-        # Arrange: Create a project
-        new_project = await self._create_project_by_service(session)
-
+    async def test_add_attachment_by_service(self, session, new_project):
         # Arrange: Create new attachments
         NEW_ATTACHMENTS = 3
         attachment_list = []
@@ -114,7 +96,9 @@ class TestProjectServiceCase:
 
         # Act: Update project by service
         service = ProjectService(session)
-        project_return = await service.update(new_project.id, updated_dto)
+        project_return = await service.update(
+            new_project.owner_id, new_project.id, updated_dto
+        )
 
         # Assert: Check if the updated success
         dto_attachments = {a.checksum: a.model_dump() for a in updated_dto.attachments}
@@ -127,3 +111,38 @@ class TestProjectServiceCase:
         for key, attachment in dto_attachments.items():
             return_attachment = return_attachments[key]
             assert all(return_attachment[k] == v for k, v in attachment.items())
+
+    async def test_get_project_by_service(self, session, new_project):
+        # Act: Get project by service
+        service = ProjectService(session)
+        project_return = await service.get_by_id(new_project.owner_id, new_project.id)
+
+        # Assert: Check if the project be the same
+        assert project_return == new_project
+
+    async def test_list_project_by_service(self, session):
+        # Arrange: Generate owner_id
+        owner_id = generate_id()
+        # Arrange: Create projects by service
+        NEW_PROJECTS = 7
+        new_projects = []
+
+        for _ in range(NEW_PROJECTS):
+            project_return = await create_project_by_service(session, owner_id=owner_id)
+            new_projects.append(project_return)
+
+        # Act: Get projects
+        service = ProjectService(session)
+        project_list_return = await service.list_by_owner_id(owner_id)
+
+        # Assert: Check if the project be the same
+        assert all(proj in project_list_return for proj in new_projects)
+
+    async def test_delete_project_by_service(self, session, new_project):
+        # Act: Delete project by service
+        service = ProjectService(session)
+        await service.delete_by_id(new_project.owner_id, new_project.id)
+
+        # Assert: Check if the project deleted
+        with pytest.raises(ValueError):
+            await service.get_by_id(new_project.owner_id, new_project.id)

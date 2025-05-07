@@ -8,6 +8,7 @@ import tempfile
 from src.api.database import Base
 from src.api.main import app
 from src.api.dependencies import get_async_session
+from src.api.utils import generate_id
 
 
 @pytest.fixture(name="session", scope="function")
@@ -53,3 +54,8 @@ def client_fixture(session):
     client = TestClient(app)
     yield client
     app.dependency_overrides.clear()
+
+
+@pytest.fixture(name="default_account_id", scope="function")
+def default_account_id():
+    return generate_id()

@@ -1,11 +1,11 @@
 from sqlalchemy import select
 from dataclasses import asdict
-from .base import BaseSQLALchemyRepo
+from .base import EntitySQLAlchemyRepo
 from src.api.domain import TagDomain
-from src.api.model import Tag, ProjectTagAssociation
+from src.api.model import Tag
 
 
-class TagRepo(BaseSQLALchemyRepo):
+class TagRepo(EntitySQLAlchemyRepo):
     async def create(self, tag: TagDomain) -> TagDomain:
         drop_keys = {}
 
@@ -25,6 +25,16 @@ class TagRepo(BaseSQLALchemyRepo):
         # Build tag domain from orm
         return await self._orm_to_domain(tag_orm)
 
+    async def get_by_ids(self, tag_ids: list) -> list[TagDomain]:
+        # Get tag orm by ids
+        tag_results = await self._session.scalars(
+            select(Tag).where(Tag.id.in_(tag_ids))
+        )
+        orms = tag_results.all()
+
+        # Build tag domain from orm
+        return [await self._orm_to_domain(tag_orm) for tag_orm in orms]
+
     async def list_by_owner_id(self, account_id: str) -> list[TagDomain]:
         # query for selecting given orm
         statement = select(Tag).filter_by(owner_id=account_id)
@@ -32,25 +42,6 @@ class TagRepo(BaseSQLALchemyRepo):
         # list of orm objects
         results = await self._session.scalars(statement)
         orms = results.all()
-
-        return [await self._orm_to_domain(tag_orm) for tag_orm in orms]
-
-    async def list_by_project_id(self, project_id: str) -> list[TagDomain]:
-        # Get assoc based on project_id
-        results = await self._session.scalars(
-            select(ProjectTagAssociation).filter_by(project_id=project_id)
-        )
-
-        assocs = results.all()
-
-        # Get tag IDs
-        selected_tag_ids = [assoc.tag_id for assoc in assocs]
-
-        # Get tag
-        tag_results = await self._session.scalars(
-            select(Tag).where(Tag.id.in_(selected_tag_ids))
-        )
-        orms = tag_results.all()
 
         return [await self._orm_to_domain(tag_orm) for tag_orm in orms]
 

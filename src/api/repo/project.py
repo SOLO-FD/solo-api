@@ -1,11 +1,11 @@
 from sqlalchemy import select, delete
 from dataclasses import asdict
-from .base import BaseSQLALchemyRepo
+from .base import EntitySQLAlchemyRepo
 from src.api.domain import ProjectDomain
 from src.api.model import Project, Attachment, Tag, ProjectTagAssociation
 
 
-class ProjectRepo(BaseSQLALchemyRepo):
+class ProjectRepo(EntitySQLAlchemyRepo):
     async def create(self, project: ProjectDomain) -> ProjectDomain:
         drop_keys = {"_attachments"}
 
@@ -32,6 +32,16 @@ class ProjectRepo(BaseSQLALchemyRepo):
 
         # Build project domain from orm
         return await self._orm_to_domain(proj_orm)
+
+    async def get_by_ids(self, project_ids: list) -> ProjectDomain:
+        # Get project orm by ids
+        proj_results = await self._session.scalars(
+            select(Project).where(Project.id.in_(project_ids))
+        )
+        orms = proj_results.all()
+
+        # Build project domain from orm
+        return [await self._orm_to_domain(proj_orm) for proj_orm in orms]
 
     async def list_by_owner_id(self, owner_id: str) -> list[ProjectDomain]:
         # query for selecting given orm
@@ -69,6 +79,15 @@ class ProjectRepo(BaseSQLALchemyRepo):
         await self._session.delete(proj_orm)
 
     #  === Tag-related ===
+    async def add_tag_by_id(self, project_id: str, tag_id: str) -> None:
+        # Check if tag existed
+        if await self._session.get(Tag, tag_id, populate_existing=True) is None:
+            raise ValueError(f"Tag with ID {tag_id} not existed.")
+
+        assoc = ProjectTagAssociation(project_id=project_id, tag_id=tag_id)
+
+        self._session.add(assoc)
+        await self._session.commit()
 
     async def list_by_tag_id(self, tag_id: str) -> list[ProjectDomain]:
         # Get assoc based on tag_id
@@ -88,16 +107,6 @@ class ProjectRepo(BaseSQLALchemyRepo):
         orms = proj_results.all()
 
         return [await self._orm_to_domain(proj_orm) for proj_orm in orms]
-
-    async def add_tag_by_id(self, project_id: str, tag_id: str) -> None:
-        # Check if tag existed
-        if await self._session.get(Tag, tag_id, populate_existing=True) is None:
-            raise ValueError(f"Tag with ID {tag_id} not existed.")
-
-        assoc = ProjectTagAssociation(project_id=project_id, tag_id=tag_id)
-
-        self._session.add(assoc)
-        await self._session.commit()
 
     async def remove_tag_by_id(self, project_id: str, tag_id: str) -> None:
         # Get assoc

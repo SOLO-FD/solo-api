@@ -8,29 +8,9 @@ from src.api.domain import BaseDomain
 from src.api.model import BaseModel
 
 
-class BaseSQLALchemyRepo(ABC):
+class BaseSQLAlchemyRepo(ABC):
     def __init__(self, session: AsyncSession):
         self._session = session
-
-    @abstractmethod
-    async def create(self, *args, **kwargs):
-        raise NotImplementedError
-
-    @abstractmethod
-    async def update(self, *args, **kwargs):
-        raise NotImplementedError
-
-    @abstractmethod
-    async def get_by_id(self, *args, **kwargs):
-        raise NotImplementedError
-
-    @abstractmethod
-    async def list_by_owner_id(self, *args, **kwargs):
-        raise NotImplementedError
-
-    @abstractmethod
-    async def delete_by_id(self, *args, **kwargs):
-        raise NotImplementedError
 
     # === Private Helper Methods ===
 
@@ -76,3 +56,25 @@ class BaseSQLALchemyRepo(ABC):
         await self._session.refresh(orm)
 
         return orm
+
+
+class EntitySQLAlchemyRepo(BaseSQLAlchemyRepo):
+    @abstractmethod
+    async def create(self, *args, **kwargs):
+        raise NotImplementedError
+
+    @abstractmethod
+    async def update(self, *args, **kwargs):
+        raise NotImplementedError
+
+    @abstractmethod
+    async def get_by_id(self, *args, **kwargs):
+        raise NotImplementedError
+
+    @abstractmethod
+    async def list_by_owner_id(self, *args, **kwargs):
+        raise NotImplementedError
+
+    @abstractmethod
+    async def delete_by_id(self, *args, **kwargs):
+        raise NotImplementedError

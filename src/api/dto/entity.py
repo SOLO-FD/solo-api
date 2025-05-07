@@ -14,7 +14,6 @@ class EntityDTO(BaseDTO):
 
 class EntityCreateDTOMixin(BaseCreateDTOMixin):
     name: str
-    owner_id: str
 
 
 class EntityUpdateDTOMixin(BaseUpdateDTOMixin):
@@ -23,5 +22,4 @@ class EntityUpdateDTOMixin(BaseUpdateDTOMixin):
 
 class EntityPublicDTOMixin(BasePublicDTOMixin):
     name: str
-    owner_id: str
     updated_at: datetime

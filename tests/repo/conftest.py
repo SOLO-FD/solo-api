@@ -3,6 +3,7 @@ from dataclasses import asdict
 from src.api.repo import (
     ProjectRepo,
     TagRepo,
+    ProjectTagRepo,
 )
 from tests.factory.domains import (
     ProjectDomainFactory,
@@ -31,3 +32,18 @@ async def _create_default_tag_from_repo(session):
     tag_from_repo = await repo.create(tag)
 
     return tag_from_repo
+
+
+@pytest.fixture(name="project_repo", scope="function")
+def create_project_repo(session):
+    return ProjectRepo(session)
+
+
+@pytest.fixture(name="tag_repo", scope="function")
+def create_tag_repo(session):
+    return TagRepo(session)
+
+
+@pytest.fixture(name="project_tag_repo", scope="function")
+def create_project_tag_repo(session):
+    return ProjectTagRepo(session)
