@@ -2,6 +2,7 @@ from .base import BaseDomain, EntityDomain
 from .project import ProjectDomain
 from .attachment import AttachmentDomain
 from .tag import TagDomain
+from .project_tag import ProjectTagDomain
 
 __all__ = [
     "BaseDomain",
@@ -9,4 +10,5 @@ __all__ = [
     "ProjectDomain",
     "AttachmentDomain",
     "TagDomain",
+    "ProjectTagDomain",
 ]

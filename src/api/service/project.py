@@ -59,14 +59,3 @@ class ProjectService(BaseDBService):
         await self.get_by_id(owner_id, project_id)
 
         return await self._repo.delete_by_id(project_id)
-
-    # === Tag related service ===
-
-    async def list_by_tag_id(self, tag_id: str) -> list[ProjectDomain]:
-        pass
-
-    async def add_tag_by_id(self, project_id: str, tag_id: str) -> ProjectDomain:
-        pass
-
-    async def remove_tag_by_id(self, project_id: str, tag_id: str) -> ProjectDomain:
-        pass

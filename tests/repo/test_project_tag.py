@@ -67,7 +67,7 @@ class TestProjectTagModelCase:
         project_tags_from_repo = await project_tag_repo.list_by_project_id(
             default_project.id
         )
-        tags_list = [item["tag"] for item in project_tags_from_repo]
+        tags_list = [item.tag for item in project_tags_from_repo]
 
         # Assert: Check all new tags included
         assert all(tag in tags_list for tag in new_tags)

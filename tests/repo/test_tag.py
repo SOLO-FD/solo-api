@@ -53,6 +53,17 @@ class TestTagModelCase:
 
         assert all(tag in tags_from_repo for tag in new_tags)
 
+    async def test_tag_model_get_ids_by_repo(self, tag_repo, default_tag):
+        # Arrange: Create tags
+        NEW_TAGS = 5
+        new_tags = []
+        for _ in range(NEW_TAGS):
+            new_tags.append(await create_tag(tag_repo))
+
+        # Act: Get tags owned by the same owner
+        tags_from_repo = await tag_repo.get_by_ids([proj.id for proj in new_tags])
+        assert all(proj in tags_from_repo for proj in new_tags)
+
     async def test_tag_model_remove_by_repo(self, tag_repo, default_tag):
         # Arrange: Get by repo
         get_tag = await tag_repo.get_by_id(default_tag.id)

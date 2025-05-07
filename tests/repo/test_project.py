@@ -122,6 +122,19 @@ class TestProjectModelCase:
 
         assert all(proj in projects_from_repo for proj in new_projects)
 
+    async def test_project_model_get_ids_by_repo(self, project_repo, default_project):
+        # Arrange: Create projects
+        NEW_PROJECTS = 5
+        new_projects = []
+        for _ in range(NEW_PROJECTS):
+            new_projects.append(await create_project(project_repo))
+
+        # Act: Get projects owned by the same owner
+        projects_from_repo = await project_repo.get_by_ids(
+            [proj.id for proj in new_projects]
+        )
+        assert all(proj in projects_from_repo for proj in new_projects)
+
     async def test_project_model_remove_by_repo(self, project_repo, default_project):
         # Arrange: Get by repo
         get_proj = await project_repo.get_by_id(default_project.id)

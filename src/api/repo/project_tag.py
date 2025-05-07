@@ -1,12 +1,11 @@
 from sqlalchemy import select
 from .base import BaseSQLAlchemyRepo
-from src.api.domain import ProjectDomain, TagDomain
+from src.api.domain import ProjectDomain, ProjectTagDomain
 from src.api.model import ProjectTagAssociation
 from src.api.repo import ProjectRepo, TagRepo
 
 
 class ProjectTagRepo(BaseSQLAlchemyRepo):
-    #  === Tag-related ===
     async def add_tag_by_id(self, project_id: str, tag_id: str) -> None:
         # Check if tag existed
         tag_repo = TagRepo(self._session)
@@ -34,7 +33,7 @@ class ProjectTagRepo(BaseSQLAlchemyRepo):
 
         return project_domains
 
-    async def list_by_project_id(self, project_id: str) -> list[TagDomain]:
+    async def list_by_project_id(self, project_id: str) -> list[ProjectTagDomain]:
         # Get assoc based on project_id
         results = await self._session.scalars(
             select(ProjectTagAssociation).filter_by(project_id=project_id)
@@ -52,11 +51,12 @@ class ProjectTagRepo(BaseSQLAlchemyRepo):
         project_tag_list = []
         for tag in tag_domains:
             assoc = assoc_dict[tag.id]
-            project_tag_item = {
-                "created_at": assoc.created_at,
-                "tag": tag,
-            }
-            project_tag_list.append(project_tag_item)
+            project_tag_list.append(
+                ProjectTagDomain(
+                    created_at=assoc.created_at,
+                    tag=tag,
+                )
+            )
 
         return project_tag_list
 

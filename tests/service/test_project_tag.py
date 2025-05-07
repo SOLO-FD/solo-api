@@ -1,145 +1,178 @@
-# class TestProjectServiceCase:
-# === HAPPY tests following ===
-# async def test_project_add_tag_by_id_by_service(self, session, new_project, new_tag):
-#     # Act: Add tag to project
-#     service = ProjectService(session)
-#     return_list = await service.add_tag_by_id(new_project.id, new_tag.id)
+import pytest
 
-#     # Assert: Check if tag get added to project by repo
-#     repo = ProjectRepo(session)
-#     tag_list = await repo.list_by_tag_id(new_tag.id)
+from src.api.service import ProjectTagService
+from src.api.dto import (
+    ProjectTagCreateDTO,
+)
+from src.api.repo import ProjectTagRepo
+from src.api.domain import ProjectTagDomain
+from src.api.utils import generate_id
+from tests.factory.service import create_project_by_service, create_tag_by_service
 
-#     assert
 
-# async def test_create_project_by_service(self, session):
-#     # Arrange: Create project create DTO
-#     project_dto = new_dto_from_domain_factory(
-#         ProjectDomainFactory,
-#         ProjectCreateDTO,
-#     )
+class TestProjectServiceCase:
+    async def _add_tag_to_project(self, session, project_id, tag_id):
+        repo = ProjectTagRepo(session)
 
-#     NEW_ATTACHMENTS = 5
-#     for _ in range(NEW_ATTACHMENTS):
-#         attachment_dto = new_dto_from_domain_factory(
-#             AttachmentDomainFactory,
-#             AttachmentCreateDTO,
-#         )
-#         project_dto.attachments.append(attachment_dto)
+        return await repo.add_tag_by_id(project_id, tag_id)
 
-#     # Act: Create project by service
-#     service = ProjectService(session)
-#     fake_id = generate_id()
+    # === HAPPY tests following ===
+    async def test_project_add_tag_by_id_by_service(
+        self, session, new_project, new_tag
+    ):
+        # Arrange: Get owner_id
+        owner_id = new_project.owner_id
 
-#     project_return = await service.create(fake_id, project_dto)
+        # Act: Add tag to project
+        service = ProjectTagService(session)
+        project_tag_dto = ProjectTagCreateDTO(tag_id=new_tag.id)
+        return_list = await service.add_tag_by_id(
+            owner_id, new_project.id, project_tag_dto
+        )
 
-#     # Assert: Assert Correct type
-#     assert isinstance(project_return, ProjectDomain)
+        # Assert: Check if tag get added to project by repo
+        repo = ProjectTagRepo(session)
+        project_tag_list = await repo.list_by_project_id(new_project.id)
+        tag_list = [item.tag for item in project_tag_list]
 
-#     # Assert: Core attributes match (exclude attachments for now)
-#     expected_dict = project_dto.model_dump(exclude={"attachments"})
-#     actual_dict = asdict(project_return)
+        # Assert: CHeck if the return is as expected type
+        for item in return_list:
+            assert isinstance(item, ProjectTagDomain)
 
-#     for key, expected_val in expected_dict.items():
-#         assert actual_dict[key] == expected_val, f"Mismatch on '{key}'"
+        # Assert: Check if the added tag in repo
+        assert new_tag in tag_list
 
-#     # Assert: Attachments match by checksum
-#     returned_attachments = {
-#         a.checksum: asdict(a) for a in project_return.attachments
-#     }
-#     input_attachments = {
-#         a.checksum: a.model_dump() for a in project_dto.attachments
-#     }
+    async def test_project_list_by_tag_id_by_service(
+        self, session, new_project, new_tag
+    ):
+        # Arrange: Get owner_id
+        owner_id = new_project.owner_id
 
-#     assert returned_attachments.keys() == input_attachments.keys(), (
-#         "Attachment checksums mismatch"
-#     )
+        # Arrange: Add tag to project
+        await self._add_tag_to_project(session, new_project.id, new_tag.id)
 
-#     for checksum, ret_data in returned_attachments.items():
-#         input_data = input_attachments[checksum]
-#         for k, v in input_data.items():
-#             assert ret_data.get(k) == v, (
-#                 f"Mismatch on attachment '{checksum}' key '{k}'"
-#             )
+        # Act: Get projects by giving tag_id
+        service = ProjectTagService(session)
+        project_list = await service.list_by_tag_id(owner_id, new_tag.id)
 
-# async def test_update_project_by_service(self, session, new_project):
-#     # Arrange: Create a project update dto
-#     update_param = {"name": "This is update name!"}
-#     updated_dto = ProjectUpdateDTO(**update_param)
+        # Assert: Check if project got
+        assert new_project in project_list
 
-#     # Act: Update project by service
-#     service = ProjectService(session)
-#     project_return = await service.update(
-#         new_project.owner_id, new_project.id, updated_dto
-#     )
+    async def test_project_list_by_project_id_by_service(
+        self, session, new_project, new_tag
+    ):
+        # Arrange: Get owner_id
+        owner_id = new_project.owner_id
 
-#     # Assert: Check if the updated success
-#     return_dict = asdict(project_return)
-#     assert all(return_dict[k] == v for k, v in update_param.items())
+        # Arrange: Add tag to project
+        await self._add_tag_to_project(session, new_project.id, new_tag.id)
 
-# async def test_add_attachment_by_service(self, session, new_project):
-#     # Arrange: Create new attachments
-#     NEW_ATTACHMENTS = 3
-#     attachment_list = []
-#     for _ in range(NEW_ATTACHMENTS):
-#         new_attachment = new_dto_from_domain_factory(
-#             AttachmentDomainFactory, AttachmentCreateDTO
-#         )
-#         attachment_list.append(new_attachment)
+        # Act: Get tags by giving project_id
+        service = ProjectTagService(session)
+        project_tag_list = await service.list_by_project_id(owner_id, new_project.id)
 
-#     # Arrange: Create update DTO
-#     updated_dto = ProjectUpdateDTO(attachments=attachment_list)
+        tag_list = [item.tag for item in project_tag_list]
 
-#     # Act: Update project by service
-#     service = ProjectService(session)
-#     project_return = await service.update(
-#         new_project.owner_id, new_project.id, updated_dto
-#     )
+        # Assert: Check if project got
+        assert new_tag in tag_list
 
-#     # Assert: Check if the updated success
-#     dto_attachments = {a.checksum: a.model_dump() for a in updated_dto.attachments}
-#     return_attachments = {a.checksum: asdict(a) for a in project_return.attachments}
+    async def test_project_remove_tag_by_id_by_service(
+        self, session, new_project, new_tag
+    ):
+        # Arrange: Get owner_id
+        owner_id = new_project.owner_id
 
-#     # Check all new attachments added
-#     assert set(dto_attachments.keys()).issubset(set(return_attachments.keys()))
+        # Arrange: Add tag to project
+        await self._add_tag_to_project(session, new_project.id, new_tag.id)
 
-#     # Check if all attachments are hold the same info
-#     for key, attachment in dto_attachments.items():
-#         return_attachment = return_attachments[key]
-#         assert all(return_attachment[k] == v for k, v in attachment.items())
+        # Act: Remove tag from project by giving tag_id
+        service = ProjectTagService(session)
+        project_tag_list = await service.remove_tag_by_id(
+            owner_id, new_project.id, new_tag.id
+        )
 
-# async def test_get_project_by_service(self, session, new_project):
-#     # Act: Get project by service
-#     service = ProjectService(session)
-#     project_return = await service.get_by_id(new_project.owner_id, new_project.id)
+        tag_list = [item.tag for item in project_tag_list]
 
-#     # Assert: Check if the project be the same
-#     assert project_return == new_project
+        # Assert: Check if project got
+        assert new_tag not in tag_list
 
-# async def test_list_project_by_service(self, session):
-#     # Arrange: Generate owner_id
-#     owner_id = generate_id()
-#     # Arrange: Create projects by service
-#     NEW_PROJECTS = 7
-#     new_projects = []
+    # === SAD tests following ===
+    async def test_project_add_tag_to_non_owned_project_by_id_by_service(
+        self, session, new_tag
+    ):
+        # Arrange: Create non_owned project
+        another_account_id = generate_id()
+        new_project = await create_project_by_service(
+            session, owner_id=another_account_id
+        )
 
-#     for _ in range(NEW_PROJECTS):
-#         project_return = await self._create_project_by_service(
-#             session, owner_id=owner_id
-#         )
-#         new_projects.append(project_return)
+        # Arrange: Get owner_id
+        owner_id = new_tag.owner_id
 
-#     # Act: Get projects
-#     service = ProjectService(session)
-#     project_list_return = await service.list_by_owner_id(owner_id)
+        # Act: Add tag to non-owned project should raise ValueError
+        service = ProjectTagService(session)
+        project_tag_dto = ProjectTagCreateDTO(tag_id=new_tag.id)
 
-#     # Assert: Check if the project be the same
-#     assert all(proj in project_list_return for proj in new_projects)
+        with pytest.raises(ValueError):
+            await service.add_tag_by_id(owner_id, new_project.id, project_tag_dto)
 
-# async def test_delete_project_by_service(self, session, new_project):
-#     # Act: Delete project by service
-#     service = ProjectService(session)
-#     await service.delete_by_id(new_project.owner_id, new_project.id)
+    async def test_project_add_non_owned_tag_by_id_by_service(
+        self, session, new_project
+    ):
+        # Arrange: Create non_owned tag
+        another_account_id = generate_id()
+        new_tag = await create_tag_by_service(session, owner_id=another_account_id)
 
-#     # Assert: Check if the project deleted
-#     with pytest.raises(ValueError):
-#         await service.get_by_id(new_project.owner_id, new_project.id)
+        # Arrange: Get owner_id
+        owner_id = new_project.owner_id
+
+        # Act: Add non-owned tag to project should raise ValueError
+        service = ProjectTagService(session)
+        project_tag_dto = ProjectTagCreateDTO(tag_id=new_tag.id)
+
+        with pytest.raises(ValueError):
+            await service.add_tag_by_id(owner_id, new_project.id, project_tag_dto)
+
+    async def test_project_list_by_non_owned_tag_id_by_service(
+        self, session, new_project, new_tag
+    ):
+        # Arrange: Get another account id
+        owner_id = generate_id()
+
+        # Arrange: Add tag to project
+        await self._add_tag_to_project(session, new_project.id, new_tag.id)
+
+        # Act: Get projects by giving non-owned tag_id should raise ValueError
+        service = ProjectTagService(session)
+
+        with pytest.raises(ValueError):
+            await service.list_by_tag_id(owner_id, new_tag.id)
+
+    async def test_project_list_by_non_owned_project_id_by_service(
+        self, session, new_project, new_tag
+    ):
+        # Arrange: Get another account id
+        owner_id = generate_id()
+
+        # Arrange: Add tag to project
+        await self._add_tag_to_project(session, new_project.id, new_tag.id)
+
+        # Act: Get tags by giving non-owned project_id should raise ValueError
+        service = ProjectTagService(session)
+
+        with pytest.raises(ValueError):
+            await service.list_by_project_id(owner_id, new_project.id)
+
+    async def test_project_remove_non_owned_tag_by_id_by_service(
+        self, session, new_project, new_tag
+    ):
+        # Arrange: Get another account id
+        owner_id = generate_id()
+
+        # Arrange: Add tag to project
+        await self._add_tag_to_project(session, new_project.id, new_tag.id)
+
+        # Act: Remove tag from project by giving non-owned tag_id should raise ValueError
+        service = ProjectTagService(session)
+        with pytest.raises(ValueError):
+            await service.remove_tag_by_id(owner_id, new_project.id, new_tag.id)

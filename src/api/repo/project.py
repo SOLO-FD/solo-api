@@ -2,7 +2,7 @@ from sqlalchemy import select, delete
 from dataclasses import asdict
 from .base import EntitySQLAlchemyRepo
 from src.api.domain import ProjectDomain
-from src.api.model import Project, Attachment, Tag, ProjectTagAssociation
+from src.api.model import Project, Attachment
 
 
 class ProjectRepo(EntitySQLAlchemyRepo):
@@ -77,51 +77,6 @@ class ProjectRepo(EntitySQLAlchemyRepo):
         # Get obj from db first
         proj_orm = await self._get_proj_from_db(project_id)
         await self._session.delete(proj_orm)
-
-    #  === Tag-related ===
-    async def add_tag_by_id(self, project_id: str, tag_id: str) -> None:
-        # Check if tag existed
-        if await self._session.get(Tag, tag_id, populate_existing=True) is None:
-            raise ValueError(f"Tag with ID {tag_id} not existed.")
-
-        assoc = ProjectTagAssociation(project_id=project_id, tag_id=tag_id)
-
-        self._session.add(assoc)
-        await self._session.commit()
-
-    async def list_by_tag_id(self, tag_id: str) -> list[ProjectDomain]:
-        # Get assoc based on tag_id
-        results = await self._session.scalars(
-            select(ProjectTagAssociation).filter_by(tag_id=tag_id)
-        )
-
-        assocs = results.all()
-
-        # Get project IDs
-        selected_proj_ids = [assoc.project_id for assoc in assocs]
-
-        # Get projects
-        proj_results = await self._session.scalars(
-            select(Project).where(Project.id.in_(selected_proj_ids))
-        )
-        orms = proj_results.all()
-
-        return [await self._orm_to_domain(proj_orm) for proj_orm in orms]
-
-    async def remove_tag_by_id(self, project_id: str, tag_id: str) -> None:
-        # Get assoc
-        assoc = await self._session.get(
-            ProjectTagAssociation,
-            {"project_id": project_id, "tag_id": tag_id},
-            populate_existing=True,
-        )
-        if assoc is None:
-            raise ValueError(
-                f"ProjectTagAssociation with Project ID {project_id} and Tag ID {tag_id} not existed."
-            )
-
-        await self._session.delete(assoc)
-        await self._session.commit()
 
     # === Private Methods ===
 
