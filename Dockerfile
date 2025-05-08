@@ -17,6 +17,9 @@ WORKDIR /app
 # Copy only dependency files first (for Docker layer caching)
 COPY pyproject.toml poetry.lock ./
 
+# Copy Alembic config and migration scripts
+COPY alembic.ini /app/
+COPY migration/ /app/migration/
 
 # Install dependencies (main only, no dev, no building this package)
 RUN poetry config virtualenvs.create false && \

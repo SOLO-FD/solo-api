@@ -7,8 +7,6 @@ services:
       MYSQL_DATABASE: solo_db
       MYSQL_USER: solo_user
       MYSQL_PASSWORD: solo_password
-    ports:
-      - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
   web:

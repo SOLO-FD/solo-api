@@ -6,7 +6,7 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
-from api.config import Settings  # <- your app config
+from src.api.config import Settings  # <- your app config
 
 # Load settings
 settings = Settings()
@@ -24,11 +24,11 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # Import all models for migration
-from api import model  # noqa: E402, F401
+from src.api import model  # noqa: E402, F401
 
 # target_metadata = mymodel.Base.metadata
 # Import Base for metadata
-from api.database import Base  # noqa: E402
+from src.api.database import Base  # noqa: E402
 
 target_metadata = Base.metadata
 

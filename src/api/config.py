@@ -7,7 +7,7 @@ from typing import Optional
 
 
 class Settings(BaseSettings):
-    _db_url: Optional[str] = Field(default=None, alias="DB_URL")
+    database_url: Optional[str] = Field(default=None, alias="DB_URL")
     db_type: str = Field(default="sqlite", alias="DB_TYPE")
     db_user: Optional[str] = Field(default=None, alias="DB_USER")
     db_password: Optional[str] = Field(default=None, alias="DB_PASSWORD")
@@ -30,8 +30,8 @@ class Settings(BaseSettings):
             # if self.db_type == "postgresql":
             #     return f"postgresql+psycopg2://{self.db_user}:{self.db_password}@{self.db_host}{port_part}/{self.db_name}"
         # If directly provide db_url
-        elif self._db_url:
-            return self._db_url
+        elif self.database_url:
+            return self.database_url
         # Database url is required
         else:
             raise ValueError("No valid database config found!")

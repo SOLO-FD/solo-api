@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Mapped, WriteOnlyMapped, mapped_column, relationship
-from sqlalchemy import String, Date
+from sqlalchemy import Date
 from typing import Optional
 
 from datetime import datetime, timezone, date
@@ -19,8 +19,8 @@ class Project(EntityModel):
         default=None,
         index=True,
     )
-    header_url: Mapped[Optional[str]] = mapped_column(String, default=None)
-    cover_url: Mapped[Optional[str]] = mapped_column(String, default=None)
+    # header_url: Mapped[Optional[str]] = mapped_column(String(2048), default=None)
+    # cover_url: Mapped[Optional[str]] = mapped_column(String(2048), default=None)
 
     # One-to-many with attachment
     attachments: WriteOnlyMapped["Attachment"] = relationship(  # noqa:F821

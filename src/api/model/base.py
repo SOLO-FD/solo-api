@@ -24,7 +24,7 @@ class EntityModel(BaseModel):
     __abstract__ = True
 
     name: Mapped[str] = mapped_column(String(128), index=True)
-    owner_id: Mapped[str] = mapped_column(String, index=True)
+    owner_id: Mapped[str] = mapped_column(String(13), index=True)
     updated_at: Mapped[datetime] = mapped_column(
         default=lambda: datetime.now(timezone.utc),
         onupdate=lambda: datetime.now(timezone.utc),

@@ -10,7 +10,7 @@ class Attachment(BaseModel):
 
     filename: Mapped[str] = mapped_column(String(128), index=True)
     file_type: Mapped[FileType] = mapped_column(String(10), index=True)
-    url: Mapped[str] = mapped_column(String, unique=True)
+    url: Mapped[str] = mapped_column(String(2048), unique=True)
     size: Mapped[int] = mapped_column(BigInteger)
 
     # By SHA256
