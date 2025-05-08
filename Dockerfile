@@ -19,7 +19,7 @@ COPY pyproject.toml poetry.lock ./
 
 # Copy Alembic config and migration scripts
 COPY alembic.ini /app/
-COPY migration/ /app/migration/
+COPY migrations/ /app/migrations/
 
 # Install dependencies (main only, no dev, no building this package)
 RUN poetry config virtualenvs.create false && \

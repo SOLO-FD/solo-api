@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import String, BigInteger, ForeignKey
+from sqlalchemy import String, BigInteger, ForeignKey, Text
 from ..enums import FileType
 
 from .base import BaseModel
@@ -10,7 +10,7 @@ class Attachment(BaseModel):
 
     filename: Mapped[str] = mapped_column(String(128), index=True)
     file_type: Mapped[FileType] = mapped_column(String(10), index=True)
-    url: Mapped[str] = mapped_column(String(2048), unique=True)
+    url: Mapped[str] = mapped_column(Text)
     size: Mapped[int] = mapped_column(BigInteger)
 
     # By SHA256
