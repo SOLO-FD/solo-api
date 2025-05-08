@@ -2,7 +2,7 @@
 set -e
 
 # Wait a few second for setup database
-sleep 5
+sleep 10
 
 # Run Alembic migrations
 echo "Running Alembic migrations..."
