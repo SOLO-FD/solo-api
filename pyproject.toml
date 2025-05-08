@@ -6,7 +6,7 @@ authors = [
     {name = "Huang Chuan",email = "river1440@gmail.com"}
 ]
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.13,<4.0"
 dependencies = [
     "fastapi[standard] (>=0.115.12,<0.116.0)",
     "alembic (>=1.15.2,<2.0.0)",
@@ -38,6 +38,12 @@ optional = true
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.11.8"
 pre-commit = "^4.2.0"
+
+[tool.poetry.group.prod]
+optional = true
+
+[tool.poetry.group.prod.dependencies]
+asyncmy = "^0.2.10"
 
 [tool.pytest.ini_options]
 pythonpath = "src"

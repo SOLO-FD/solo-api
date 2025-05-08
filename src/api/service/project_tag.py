@@ -1,5 +1,4 @@
 from .base import BaseDBService
-from api.dto.project_tag import ProjectTagCreateDTO
 from api.domain import ProjectDomain, ProjectTagDomain
 from api.repo import ProjectTagRepo, ProjectRepo, TagRepo
 
@@ -10,11 +9,11 @@ class ProjectTagService(BaseDBService):
         self._repo = ProjectTagRepo(session)
 
     async def add_tag_by_id(
-        self, owner_id: str, project_id: str, tag_dto: ProjectTagCreateDTO
+        self,
+        owner_id: str,
+        project_id: str,
+        tag_id: str,
     ) -> list[ProjectTagDomain]:
-        # Get tag_id from dto
-        tag_id = tag_dto.tag_id
-
         # Check ownership
         await self._check_project_ownership(owner_id, project_id)
         await self._check_tag_ownership(owner_id, tag_id)
@@ -24,6 +23,23 @@ class ProjectTagService(BaseDBService):
 
         # Return updated set of tags
         return await self.list_by_project_id(owner_id, project_id)
+
+    # async def add_tags_by_id(
+    #     self, owner_id: str, project_id: str, tag_dto_list: list[ProjectTagCreateDTO]
+    # ) -> list[ProjectTagDomain]:
+    #     # Check ownership
+    #     await self._check_project_ownership(owner_id, project_id)
+
+    #     for tag_dto in tag_dto_list:
+    #         # Get tag_id from dto
+    #         tag_id = tag_dto.tag_id
+    #         await self._check_tag_ownership(owner_id, tag_id)
+
+    #         # Add tag to project
+    #         await self._repo.add_tag_by_id(project_id, tag_id)
+
+    #     # Return updated set of tags
+    #     return await self.list_by_project_id(owner_id, project_id)
 
     async def list_by_tag_id(self, owner_id: str, tag_id: str) -> list[ProjectDomain]:
         # Check ownership

@@ -1,0 +1,24 @@
+services:
+  db:
+    image: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: solo_db
+      MYSQL_USER: solo_user
+      MYSQL_PASSWORD: solo_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+  web:
+    build: .
+    depends_on:
+      - db
+    env_file:
+      - .env.stage
+    ports:
+      - "8088:8088"
+
+volumes:
+  mysql_data:

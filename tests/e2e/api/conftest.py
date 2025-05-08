@@ -27,6 +27,6 @@ async def default_tag(session, default_account_id):
 
 @pytest.fixture(scope="function")
 async def default_tag_add_to_project(session, default_tag, default_project):
-    ProjectTagRepo(session).add_tag_by_id(default_project.id, default_tag.id)
+    await ProjectTagRepo(session).add_tag_by_id(default_project.id, default_tag.id)
 
     return await TagRepo(session).get_by_id(default_tag.id)

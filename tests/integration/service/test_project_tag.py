@@ -1,9 +1,10 @@
 import pytest
 
 from api.service import ProjectTagService
-from api.dto import (
-    ProjectTagCreateDTO,
-)
+
+# from api.dto import (
+#     ProjectTagCreateDTO,
+# )
 from api.repo import ProjectTagRepo
 from api.domain import ProjectTagDomain
 from api.utils import generate_id
@@ -25,10 +26,7 @@ class TestProjectServiceCase:
 
         # Act: Add tag to project
         service = ProjectTagService(session)
-        project_tag_dto = ProjectTagCreateDTO(tag_id=new_tag.id)
-        return_list = await service.add_tag_by_id(
-            owner_id, new_project.id, project_tag_dto
-        )
+        return_list = await service.add_tag_by_id(owner_id, new_project.id, new_tag.id)
 
         # Assert: Check if tag get added to project by repo
         repo = ProjectTagRepo(session)
@@ -41,6 +39,35 @@ class TestProjectServiceCase:
 
         # Assert: Check if the added tag in repo
         assert new_tag in tag_list
+
+    # async def test_project_add_tags_by_id_by_service(
+    #     self, session, new_project, new_tag
+    # ):
+    #     # Arrange: Get owner_id
+    #     owner_id = new_project.owner_id
+
+    #     # Arrange: Create new tags
+    #     NEW_TAGS = 7
+    #     new_tags = []
+
+    #     for _ in range(NEW_TAGS):
+    #         new_tag = await create_tag_by_service(session, owner_id=owner_id)
+    #         new_tags.append(new_tag)
+
+    #     # Act: Add tag to project
+    #     service = ProjectTagService(session)
+    #     project_tag_dtos = [ ProjectTagCreateDTO(tag_id=t.id) for t in new_tags ]
+    #     await service.add_tags_by_id(
+    #         owner_id, new_project.id, project_tag_dtos
+    #     )
+
+    #     # Assert: Check if tag get added to project by repo
+    #     repo = ProjectTagRepo(session)
+    #     project_tag_list = await repo.list_by_project_id(new_project.id)
+    #     tag_list = [item.tag for item in project_tag_list]
+
+    #     # Assert: Check if the added tag in repo
+    #     assert all(new_tag in tag_list for new_tag in new_tags)
 
     async def test_project_list_by_tag_id_by_service(
         self, session, new_project, new_tag
@@ -111,10 +138,9 @@ class TestProjectServiceCase:
 
         # Act: Add tag to non-owned project should raise ValueError
         service = ProjectTagService(session)
-        project_tag_dto = ProjectTagCreateDTO(tag_id=new_tag.id)
 
         with pytest.raises(ValueError):
-            await service.add_tag_by_id(owner_id, new_project.id, project_tag_dto)
+            await service.add_tag_by_id(owner_id, new_project.id, new_tag.id)
 
     async def test_project_add_non_owned_tag_by_id_by_service(
         self, session, new_project
@@ -128,10 +154,9 @@ class TestProjectServiceCase:
 
         # Act: Add non-owned tag to project should raise ValueError
         service = ProjectTagService(session)
-        project_tag_dto = ProjectTagCreateDTO(tag_id=new_tag.id)
 
         with pytest.raises(ValueError):
-            await service.add_tag_by_id(owner_id, new_project.id, project_tag_dto)
+            await service.add_tag_by_id(owner_id, new_project.id, new_tag.id)
 
     async def test_project_list_by_non_owned_tag_id_by_service(
         self, session, new_project, new_tag
