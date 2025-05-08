@@ -25,7 +25,7 @@ class Settings(BaseSettings):
             port_part = f":{self.db_port}" if self.db_port else ""
 
             if self.db_type == "mysql":
-                return f"mysql+asyncmy://{self.db_user}:{self.db_password}@{self.db_host}{port_part}/{self.db_name}"
+                return f"mysql+aiomysql://{self.db_user}:{self.db_password}@{self.db_host}{port_part}/{self.db_name}"
 
             # if self.db_type == "postgresql":
             #     return f"postgresql+psycopg2://{self.db_user}:{self.db_password}@{self.db_host}{port_part}/{self.db_name}"

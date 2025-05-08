@@ -43,7 +43,7 @@ pre-commit = "^4.2.0"
 optional = true
 
 [tool.poetry.group.prod.dependencies]
-asyncmy = "^0.2.10"
+aiomysql = "^0.2.0"
 
 [tool.pytest.ini_options]
 pythonpath = "src"
