@@ -1,6 +1,6 @@
 from sqlalchemy import select
 
-from src.api.model import Tag, Project, ProjectTagAssociation
+from api.model import Tag, Project, ProjectTagAssociation
 from tests.factory.models import TagFactory, ProjectFactory
 
 

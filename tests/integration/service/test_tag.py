@@ -1,13 +1,13 @@
 import pytest
 from dataclasses import asdict
 
-from src.api.service import TagService
-from src.api.dto import (
+from api.service import TagService
+from api.dto import (
     TagCreateDTO,
     TagUpdateDTO,
 )
-from src.api.domain import TagDomain
-from src.api.utils import generate_id
+from api.domain import TagDomain
+from api.utils import generate_id
 from tests.factory.domains import TagDomainFactory
 from tests.factory.dto import new_dto_from_domain_factory
 from tests.factory.service import create_tag_by_service

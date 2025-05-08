@@ -1,4 +1,4 @@
-from src.api.model import ProjectTagAssociation
+from api.model import ProjectTagAssociation
 from tests.factory.repo import create_project, create_tag
 
 

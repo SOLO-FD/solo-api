@@ -1,7 +1,7 @@
 from .base import BaseDBService
-from src.api.dto.project import ProjectCreateDTO, ProjectUpdateDTO
-from src.api.domain import ProjectDomain
-from src.api.repo import ProjectRepo
+from api.dto.project import ProjectCreateDTO, ProjectUpdateDTO
+from api.domain import ProjectDomain
+from api.repo import ProjectRepo
 
 
 class ProjectService(BaseDBService):
@@ -72,5 +72,3 @@ class ProjectService(BaseDBService):
 
         # Update project state
         await self._repo.update(project_domain)
-
-        return project_domain

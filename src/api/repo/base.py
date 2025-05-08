@@ -4,8 +4,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from dataclasses import asdict
 from typing import Optional
 
-from src.api.domain import BaseDomain
-from src.api.model import BaseModel
+from api.domain import BaseDomain
+from api.model import BaseModel
 
 
 class BaseSQLAlchemyRepo(ABC):

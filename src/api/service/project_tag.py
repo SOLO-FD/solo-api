@@ -1,7 +1,7 @@
 from .base import BaseDBService
-from src.api.dto.project_tag import ProjectTagCreateDTO
-from src.api.domain import ProjectDomain, ProjectTagDomain
-from src.api.repo import ProjectTagRepo, ProjectRepo, TagRepo
+from api.dto.project_tag import ProjectTagCreateDTO
+from api.domain import ProjectDomain, ProjectTagDomain
+from api.repo import ProjectTagRepo, ProjectRepo, TagRepo
 
 
 class ProjectTagService(BaseDBService):

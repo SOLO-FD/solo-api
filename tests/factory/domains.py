@@ -3,8 +3,8 @@ from faker import Faker
 from nanoid import generate
 from datetime import timedelta  # ,datetime, timezone,
 
-from src.api import domain
-from src.api.enums import FileType
+from api import domain
+from api.enums import FileType
 
 fake = Faker()
 

@@ -1,8 +1,8 @@
 from sqlalchemy import select
 from dataclasses import asdict
 from .base import EntitySQLAlchemyRepo
-from src.api.domain import TagDomain
-from src.api.model import Tag
+from api.domain import TagDomain
+from api.model import Tag
 
 
 class TagRepo(EntitySQLAlchemyRepo):

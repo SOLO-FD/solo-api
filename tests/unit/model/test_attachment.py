@@ -1,6 +1,6 @@
 import pytest
 from sqlalchemy.exc import IntegrityError
-from src.api.model import Attachment, Project
+from api.model import Attachment, Project
 from tests.factory.models import AttachmentFactory
 
 

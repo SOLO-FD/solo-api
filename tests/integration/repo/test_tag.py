@@ -2,7 +2,7 @@ import pytest
 
 from tests.factory.repo import create_tag
 from tests.factory.domains import TagDomainFactory
-from src.api.utils import generate_id
+from api.utils import generate_id
 
 
 class TestTagModelCase:

@@ -1,8 +1,8 @@
 from sqlalchemy import select, delete
 from dataclasses import asdict
 from .base import EntitySQLAlchemyRepo
-from src.api.domain import ProjectDomain
-from src.api.model import Project, Attachment
+from api.domain import ProjectDomain
+from api.model import Project, Attachment
 
 
 class ProjectRepo(EntitySQLAlchemyRepo):

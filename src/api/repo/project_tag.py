@@ -1,8 +1,8 @@
 from sqlalchemy import select
 from .base import BaseSQLAlchemyRepo
-from src.api.domain import ProjectDomain, ProjectTagDomain
-from src.api.model import ProjectTagAssociation
-from src.api.repo import ProjectRepo, TagRepo
+from api.domain import ProjectDomain, ProjectTagDomain
+from api.model import ProjectTagAssociation
+from api.repo import ProjectRepo, TagRepo
 
 
 class ProjectTagRepo(BaseSQLAlchemyRepo):

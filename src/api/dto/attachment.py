@@ -3,7 +3,7 @@ from .base import (
     BaseCreateDTOMixin,
     BasePublicDTOMixin,
 )
-from src.api.enums import FileType
+from api.enums import FileType
 
 
 class AttachmentDTO(BaseDTO):

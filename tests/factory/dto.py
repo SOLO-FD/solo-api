@@ -4,7 +4,7 @@ from tests.factory.domains import (
     BaseDomainFactory,
 )
 
-from src.api.dto import (
+from api.dto import (
     BaseDTO,
 )
 

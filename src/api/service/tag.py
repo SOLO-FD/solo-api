@@ -1,7 +1,7 @@
 from .base import BaseDBService
-from src.api.dto.tag import TagCreateDTO, TagUpdateDTO
-from src.api.domain import TagDomain
-from src.api.repo import TagRepo
+from api.dto.tag import TagCreateDTO, TagUpdateDTO
+from api.domain import TagDomain
+from api.repo import TagRepo
 
 
 class TagService(BaseDBService):

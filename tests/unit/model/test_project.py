@@ -1,5 +1,5 @@
 from sqlalchemy import select
-from src.api.model import Project, Attachment, ProjectTagAssociation, Tag
+from api.model import Project, Attachment, ProjectTagAssociation, Tag
 from tests.factory.models import ProjectFactory, TagFactory, AttachmentFactory
 
 

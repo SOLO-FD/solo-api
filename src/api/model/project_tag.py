@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import ForeignKey
 from datetime import datetime, timezone
-from src.api.database import Base
+from api.database import Base
 
 
 class ProjectTagAssociation(Base):

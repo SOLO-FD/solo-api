@@ -1,14 +1,14 @@
 import pytest
 from dataclasses import asdict
 
-from src.api.service import ProjectService
-from src.api.dto import (
+from api.service import ProjectService
+from api.dto import (
     ProjectCreateDTO,
     ProjectUpdateDTO,
     AttachmentCreateDTO,
 )
-from src.api.domain import ProjectDomain
-from src.api.utils import generate_id
+from api.domain import ProjectDomain
+from api.utils import generate_id
 from tests.factory.domains import ProjectDomainFactory, AttachmentDomainFactory
 from tests.factory.dto import new_dto_from_domain_factory
 from tests.factory.service import create_project_by_service

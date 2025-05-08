@@ -1,55 +1,86 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
+from api.dependencies import (
+    ProjectServiceDep,
+    CurrentAccountIdDep,
+)
+from api.dto import (
+    ProjectCreateDTO,
+    ProjectPublicDTO,
+    ProjectUpdateDTO,
+)
 
 router = APIRouter(
     prefix="/projects",
     tags=["projects"],
 )
 
-# @router.post("/", response_model=ProjectPublicDTO)
-# async def create_project(project: ProjectCreateDTO, session: SessionDep):
-#     db_project = Project.model_validate(project)
 
-#     repo = ProjectRepo(session)
-#     return await repo.create(project_domain)
-
-
-# @router.get("/", response_model=list[ProjectPublicDTO])
-# async def read_projectes(
-#     session: SessionDep,
-#     offset: int = 0,
-#     limit: Annotated[int, Query(le=100)] = 100,
-# ):
-#     projectes = session.exec(select(Project).offset(offset).limit(limit)).all()
-#     return projectes
+@router.post("/", response_model=ProjectPublicDTO)
+async def create_project(
+    project: ProjectCreateDTO,
+    service: ProjectServiceDep,
+    account_id: CurrentAccountIdDep,
+):
+    return await service.create(account_id, project)
 
 
-# @router.get("/{project_id}", response_model=ProjectPublicDTO)
-# async def read_project(project_id: int, session: SessionDep):
-#     project = session.get(Project, project_id)
-#     if not project:
-#         raise HTTPException(status_code=404, detail="Project not found")
-#     return project
+@router.get("/", response_model=list[ProjectPublicDTO])
+async def read_projects(
+    service: ProjectServiceDep,
+    account_id: CurrentAccountIdDep,
+):
+    return await service.list_by_owner_id(account_id)
 
 
-# @router.patch("/{project_id}", response_model=ProjectPublicDTO)
-# async def update_project(project_id: int, project: ProjectUpdateDTO, session: SessionDep):
-#     project_db = session.get(Project, project_id)
-#     if not project_db:
-#         raise HTTPException(status_code=404, detail="Project not found")
-#     project_data = project.model_dump(exclude_unset=True)
-#     project_db.sqlmodel_update(project_data)
-#     session.add(project_db)
-#     session.commit()
-#     session.refresh(project_db)
-#     return project_db
+@router.get("/{project_id}", response_model=ProjectPublicDTO)
+async def read_project(
+    project_id: str,
+    service: ProjectServiceDep,
+    account_id: CurrentAccountIdDep,
+):
+    try:
+        project = await service.get_by_id(account_id, project_id)
+    except ValueError:
+        raise HTTPException(status_code=404, detail="Project not found")
+    return project
 
 
-# @router.delete("/{project_id}")
-# async def delete_project(project_id: int, session: SessionDep):
-#     project = session.get(Project, project_id)
-#     if not project:
-#         raise HTTPException(status_code=404, detail="Project not found")
-#     session.delete(project)
-#     session.commit()
-#     return {"ok": True}
+@router.patch("/{project_id}", response_model=ProjectPublicDTO)
+async def update_project(
+    project_id: str,
+    project: ProjectUpdateDTO,
+    service: ProjectServiceDep,
+    account_id: CurrentAccountIdDep,
+):
+    try:
+        project = await service.update(account_id, project_id, project)
+    except ValueError:
+        raise HTTPException(status_code=404, detail="Project not found")
+
+    return project
+
+
+@router.delete("/{project_id}", status_code=204)
+async def delete_project(
+    project_id: str,
+    service: ProjectServiceDep,
+    account_id: CurrentAccountIdDep,
+):
+    try:
+        await service.delete_by_id(account_id, project_id)
+    except ValueError:
+        raise HTTPException(status_code=404, detail="Project not found")
+
+
+@router.delete("/{project_id}/attachments/{attachment_id}", status_code=204)
+async def remove_attachment(
+    project_id: str,
+    attachment_id: str,
+    service: ProjectServiceDep,
+    account_id: CurrentAccountIdDep,
+):
+    try:
+        await service.remove_attachment_by_id(account_id, project_id, attachment_id)
+    except ValueError:
+        raise HTTPException(status_code=404, detail="Attachment not found")

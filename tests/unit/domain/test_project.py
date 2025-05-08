@@ -1,7 +1,7 @@
 import pytest
 from dataclasses import asdict
 from tests.factory.domains import AttachmentDomainFactory
-from src.api.utils import generate_id
+from api.utils import generate_id
 
 
 class TestProjectDomainCase:

@@ -1,11 +1,11 @@
 import pytest
 from dataclasses import asdict
 
-from src.api.domain import ProjectDomain, AttachmentDomain
-from src.api.model import Attachment
+from api.domain import ProjectDomain, AttachmentDomain
+from api.model import Attachment
 from tests.factory.domains import ProjectDomainFactory, AttachmentDomainFactory
 from tests.factory.repo import create_project
-from src.api.utils import generate_id
+from api.utils import generate_id
 
 
 class TestProjectModelCase:

@@ -5,10 +5,10 @@ from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from sqlalchemy import event
 import tempfile
 
-from src.api.database import Base
-from src.api.main import app
-from src.api.dependencies import get_async_session
-from src.api.utils import generate_id
+from api.database import Base
+from api.main import app
+from api.dependencies import get_async_session
+from api.utils import generate_id
 
 
 @pytest.fixture(name="session", scope="function")

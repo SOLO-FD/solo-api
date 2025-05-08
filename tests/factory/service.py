@@ -1,11 +1,11 @@
-from src.api.service import ProjectService, TagService
-from src.api.dto import (
+from api.service import ProjectService, TagService
+from api.dto import (
     ProjectCreateDTO,
     AttachmentCreateDTO,
     TagCreateDTO,
 )
-from src.api.domain import ProjectDomain, TagDomain
-from src.api.utils import generate_id
+from api.domain import ProjectDomain, TagDomain
+from api.utils import generate_id
 from tests.factory.domains import (
     ProjectDomainFactory,
     AttachmentDomainFactory,

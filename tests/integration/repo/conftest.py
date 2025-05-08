@@ -1,6 +1,6 @@
 import pytest
 from dataclasses import asdict
-from src.api.repo import (
+from api.repo import (
     ProjectRepo,
     TagRepo,
     ProjectTagRepo,

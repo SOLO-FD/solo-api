@@ -1,12 +1,12 @@
 import pytest
 
-from src.api.service import ProjectTagService
-from src.api.dto import (
+from api.service import ProjectTagService
+from api.dto import (
     ProjectTagCreateDTO,
 )
-from src.api.repo import ProjectTagRepo
-from src.api.domain import ProjectTagDomain
-from src.api.utils import generate_id
+from api.repo import ProjectTagRepo
+from api.domain import ProjectTagDomain
+from api.utils import generate_id
 from tests.factory.service import create_project_by_service, create_tag_by_service
 
 
