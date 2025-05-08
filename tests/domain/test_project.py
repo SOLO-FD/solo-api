@@ -61,7 +61,7 @@ class TestProjectDomainCase:
 
         assert attachment is default_project.get_attachment_by_id(attachment.id)
 
-    def test_project_domain_delete_attachment_by_id(self, default_project):
+    def test_project_domain_remove_attachment_by_id(self, default_project):
         # Arrange: Add attachment
         attachment = self._add_new_attachment_to_project(default_project)
         assert attachment is default_project.get_attachment_by_id(attachment.id)
@@ -72,6 +72,27 @@ class TestProjectDomainCase:
         # Assert: Try get the removed attachment should rasie ValueError
         with pytest.raises(ValueError):
             default_project.get_attachment_by_id(attachment.id)
+
+    def test_project_domain_remove_attachments(self, default_project):
+        # Arrange: Add attachment
+        NEW_ATTACHMENTS = 7
+        new_attachments = []
+        for _ in range(NEW_ATTACHMENTS):
+            attachment = self._add_new_attachment_to_project(default_project)
+            new_attachments.append(attachment)
+
+        # Act: Remove attachment
+        REMOVED_ATTACHMENTS = 3
+        removed_attachments = []
+        for _ in range(REMOVED_ATTACHMENTS):
+            removed_attachment = new_attachments.pop()
+            removed_attachments.append(removed_attachment)
+            default_project.remove_attachment_by_id(removed_attachment.id)
+
+        # Assert: Try get the removed attachments should rasie ValueError
+        for attachment in removed_attachments:
+            with pytest.raises(ValueError):
+                default_project.get_attachment_by_id(attachment.id)
 
     def test_project_domain_add_attachment_missing_requird_field(self, default_project):
         # Arrange: Create attachment param

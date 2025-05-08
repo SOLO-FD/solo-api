@@ -55,8 +55,18 @@ class ProjectDomain(EntityDomain):
         else:
             raise ValueError(f"Attachment with ID {attachment_id} not existed")
 
-    def remove_attachment_by_id(self, attachment_id):
+    def remove_attachment_by_id(self, attachment_id: str):
         # Check if provided attachmend_id existed
         self.get_attachment_by_id(attachment_id)
 
         self._attachments = [a for a in self._attachments if a.id != attachment_id]
+
+    def remove_attachments(self, attachments: list[str]) -> None:
+        """
+        attachments: list[attachment_id]
+        """
+        # Check if provided attachmend_id existed
+        for attachment_id in attachments:
+            self.get_attachment_by_id(attachment_id)
+
+        self._attachments = [a for a in self._attachments if a.id not in attachments]

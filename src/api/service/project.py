@@ -59,3 +59,18 @@ class ProjectService(BaseDBService):
         await self.get_by_id(owner_id, project_id)
 
         return await self._repo.delete_by_id(project_id)
+
+    #  === Attachment-related Service ===
+    async def remove_attachment_by_id(
+        self, owner_id: str, project_id: str, attachment_id: str
+    ) -> None:
+        # Check if the given account owned the resource
+        project_domain = await self.get_by_id(owner_id, project_id)
+
+        # Remove attachments, return the refresh projects
+        project_domain.remove_attachment_by_id(attachment_id)
+
+        # Update project state
+        await self._repo.update(project_domain)
+
+        return project_domain

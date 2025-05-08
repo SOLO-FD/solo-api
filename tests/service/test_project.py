@@ -146,3 +146,19 @@ class TestProjectServiceCase:
         # Assert: Check if the project deleted
         with pytest.raises(ValueError):
             await service.get_by_id(new_project.owner_id, new_project.id)
+
+    # === Attachment Related ===
+    async def test_remove_attachment_by_service(self, session, new_project):
+        # Arrange: Get the selected attachment
+        selected_attachment = new_project.attachments[0]
+
+        # Act: Remove attachment by service
+        service = ProjectService(session)
+        await service.remove_attachment_by_id(
+            new_project.owner_id, new_project.id, selected_attachment.id
+        )
+
+        # Assert: Check if the attachment deleted
+        return_project = await service.get_by_id(new_project.owner_id, new_project.id)
+        with pytest.raises(ValueError):
+            await return_project.get_attachment_by_id(selected_attachment.id)
